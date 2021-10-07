@@ -43,7 +43,7 @@ class Driver():
 
     def run(self, word):
         print("Writing ", word)
-        if (len(word) > self.base_points):
+        if (len(word) > len(self.base_points)):
             print("ERROR: Can not print more than %d letters." % len(word))
             return
 
