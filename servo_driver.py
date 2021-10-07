@@ -4,21 +4,21 @@
 
 import time
 import random
-# import board
-# import busio
-# import adafruit_pca9685
-# from adafruit_servokit import ServoKit
+import board
+import busio
+import adafruit_pca9685
+from adafruit_servokit import ServoKit
 
 class Driver():
     def __init__(self):
         # super(self).__init__()
         # Set channels to the number of servo channels on your kit.
         # 8 for FeatherWing, 16 for Shield/HAT/Bonnet.
-        # self.kit = ServoKit(channels=16)
+        self.kit = ServoKit(channels=16)
 
-        # self.axis0 = self.kit.servo[0] 
-        # self.axis1 = self.kit.servo[1]
-        # self.axis2 = self.kit.servo[2]
+        self.axis0 = self.kit.servo[0] 
+        self.axis1 = self.kit.servo[1]
+        self.axis2 = self.kit.servo[2]
 
         # The global starting points for each letter we draw
         self.base_points = [(0,0), (0, 1), (0, 2)]
@@ -32,9 +32,8 @@ class Driver():
         print("going to point ", p)
         # inverse kinematics to go from f(x,y) = [theta0, theta1]
         # we actually have a direct mapping from theta1 to x and theta2 to y
-        
 
-        theta0, theta1 = 0., 0. # TODO:
+        theta0, theta1 = 0., 0. # TODO: the work of the inverse kinematics
 
     def draw_letter(self, letter):
         points = self.letter_to_points(letter)
