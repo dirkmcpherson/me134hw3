@@ -9,6 +9,8 @@ import busio
 import adafruit_pca9685
 from adafruit_servokit import ServoKit
 
+from kinematics import Solver
+
 class Driver():
     def __init__(self):
         # super(self).__init__()
@@ -23,6 +25,8 @@ class Driver():
         # The global starting points for each letter we draw
         self.base_points = [(0,0), (0, 1), (0, 2)]
 
+        self.solver = Solver()
+
     def letter_to_points(self, letter):
         # pass
         # return a list of points for drawing this letter
@@ -33,7 +37,11 @@ class Driver():
         # inverse kinematics to go from f(x,y) = [theta0, theta1]
         # we actually have a direct mapping from theta1 to x and theta2 to y
 
-        theta0, theta1 = 0., 0. # TODO: the work of the inverse kinematics
+
+        # NOTE: this doesnt work yet. 
+        theta0, theta1 = self.solver.get_goal_thetas(p)
+
+        
 
     def draw_letter(self, letter):
         points = self.letter_to_points(letter)
