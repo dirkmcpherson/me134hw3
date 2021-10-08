@@ -3,6 +3,7 @@ from sympy.matrices import rot_axis3
 from IPython import embed
 # from math import sin, cos
 import math
+import numpy as np
 
 # self.theta0 = sym.Symbol("theta0", real=True)
 # self.theta1 = sym.Symbol("theta1", real=True)
@@ -42,7 +43,19 @@ link    a   alpha   d   theta
 ## Create the symbols where everyone can see them
 theta0, theta1, l1, l2, l3 = sym.symbols('theta0 theta1 l1 l2 l3') # theta0,1 are control parameters
 
-def generate_simplified_transform_matrix_3_0():
+def generate_symbolic_transform_matrix_3_0():
+    A_0_1 = create_A_from_table(l1, 0, 0, theta0)
+    A_1_2 = create_A_from_table(l2, 0, 0, -math.pi/2)
+    A_2_3 = create_A_from_table(l3, 0, 0, math.pi/2)
+
+    return A_0_1.multiply(A_1_2).multiply(A_2_3)
+
+def generate_subs_transform_matrix_3_0(theta0, theta2):
+    l1 = .1
+    l2 = .2
+    l4 = .3
+    l3 = 2*l4*math.cos(theta2)
+
     A_0_1 = create_A_from_table(l1, 0, 0, theta0)
     A_1_2 = create_A_from_table(l2, 0, 0, -math.pi/2)
     A_2_3 = create_A_from_table(l3, 0, 0, math.pi/2)
@@ -74,26 +87,35 @@ class Solver():
     def get_goal_thetas(self, point):
         px, py = point
 
+        l1 = .1
+        l2 = .2
+        l4 = .3
 
+        e1 = l1*sym.cos(self.theta0) + l2*sym.sin(self.theta0) + sym.cos(self.theta0) - px
+        e2 = l1*sym.sin(self.theta0) - l2*sym.cos(self.theta0) - sym.cos(self.theta0) + 2*l4*sym.cos(self.theta2)*sym.sin(self.theta0) - py
 
+        # e1 = self.e1.subs(px, self.px)
+        # e2 = self.e2.subs(py, self.py)
+
+        print("Attempting to solve ik for x,y : %f, %f" % (px,py))
         solution = sym.nsolve(
-            [self.e1, self.e2],
+        # solution = sym.solve(
+            [e1, e2],
             [
                 # self.l1,
                 # self.l2,
                 # self.l3,
                 # self.l4,
-                self.px,
-                self.py
+                self.theta0,
+                self.theta2,
+                # self.px,
+                # self.py
             ],
-            [
-                # l1,
-                # l2,
-                # l4,
-                px,
-                py
-            ]
+            [0.1, 0.2]
         )
+
+        print(solution)
+        return solution[0], solution[1]
 
 
 
@@ -121,11 +143,21 @@ if __name__ == "__main__":
     # test with 2 length arm
     # test_two_segment_arm()
 
-    # T_0_3 = generate_simplified_transform_matrix_3_0()
+    T_0_3 = generate_symbolic_transform_matrix_3_0()
     # print(T_0_3)
 
+    point = np.array([0, 0])
+
     s = Solver()
-    s.get_goal_thetas((0,0))
+    theta0, theta2 = s.get_goal_thetas(point)
+
+    print("Solved to get %.2f, %2.f" % (theta0, theta2))
+
+    T_0_3 = generate_subs_transform_matrix_3_0(theta0, theta2)
+    fk_point = T_0_3.multiply(sym.Matrix([0,0,0,1]))
+
+    print("ForwardK expects ", fk_point)
+
 
 
 
