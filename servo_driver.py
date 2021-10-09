@@ -78,7 +78,7 @@ class Driver():
         for p in points:
             rel_point = (p[0] + reference_point[0], p[1] + reference_point[1])
             self.goto_point(p)
-            time.sleep(0.05)
+            time.sleep(0.1)
 
     def run(self, word):
         print("Writing ", word)
