@@ -10,6 +10,16 @@ import numpy as np
 # self.theta2 = sym.Symbol("theta2", real=True)
 # self.theta3 = sym.Symbol("theta3", real=True)
 
+l1_const = .05
+l2_const = .05
+l3_const = .1 # for debugging
+l4_const = .15
+
+def get_l3(theta2):
+    l3 = 2*l4_const*math.cos(theta2)
+    return l3
+    # return l3_const
+
 def create_A(z_rotation, dx, dy, dz=0):
     '''
     Creates a homogeneous transform matrix that rotates theta about z and translates by dx,dy,dz 
@@ -42,7 +52,6 @@ link    a   alpha   d   theta
 '''
 ## Create the symbols where everyone can see them
 theta0, theta1, l1, l2, l3 = sym.symbols('theta0 theta1 l1 l2 l3') # theta0,1 are control parameters
-
 def generate_symbolic_transform_matrix_3_0():
     A_0_1 = create_A_from_table(l1, 0, 0, theta0)
     A_1_2 = create_A_from_table(l2, 0, 0, -math.pi/2)
@@ -51,16 +60,23 @@ def generate_symbolic_transform_matrix_3_0():
     return A_0_1.multiply(A_1_2).multiply(A_2_3)
 
 def generate_subs_transform_matrix_3_0(theta0, theta2):
-    l1 = .1
-    l2 = .2
-    l4 = .3
-    l3 = 2*l4*math.cos(theta2)
-
-    A_0_1 = create_A_from_table(l1, 0, 0, theta0)
-    A_1_2 = create_A_from_table(l2, 0, 0, -math.pi/2)
+    l3 = get_l3(theta2)
+    A_0_1 = create_A_from_table(l1_const, 0, 0, theta0)
+    A_1_2 = create_A_from_table(l2_const, 0, 0, -math.pi/2)
     A_2_3 = create_A_from_table(l3, 0, 0, math.pi/2)
 
     return A_0_1.multiply(A_1_2).multiply(A_2_3)
+
+'''
+The rough and dirty hack-check on where the end effector should be given theta0, theta2 and our simplified kinematic chain
+'''
+def rough_and_dirty(theta0, theta2):
+    l3 = get_l3(theta2)
+    hypotenuse = l1_const + l3
+    eef_x = hypotenuse * math.cos(theta0)
+    eef_y = hypotenuse * math.sin(theta0)
+
+    return (eef_x, eef_y)
 
 class Solver():
     def __init__(self):
@@ -75,24 +91,18 @@ class Solver():
         # self.l3 = sym.Symbol("l3", real=True)
         # self.l4 = sym.Symbol("l4", real=True)
 
-        ## TEMP VALUES FOR LS
-        l1 = .1
-        l2 = .2
-        l4 = .3
+        # l3 = 0.2 #2*l4_const*sym.cos(self.theta2)
 
-        self.e1 = sym.Eq(self.px, l1*sym.cos(self.theta0) + l2*sym.sin(self.theta0) + sym.cos(self.theta0))
-        self.e2 = sym.Eq(self.py, l1*sym.sin(self.theta0) - l2*sym.cos(self.theta0) - sym.cos(self.theta0) + 2*l4*sym.cos(self.theta2)*sym.sin(self.theta0))
+        # self.e1 = sym.Eq(self.px, l1_const*sym.cos(self.theta0) + l2_const*sym.sin(self.theta0) + l3*sym.cos(self.theta0))
+        # self.e2 = sym.Eq(self.py, l1_const*sym.sin(self.theta0) - l2_const*sym.cos(self.theta0) + l3*sym.sin(self.theta0))
 
 
     def get_goal_thetas(self, point):
         px, py = point
 
-        l1 = .1
-        l2 = .2
-        l4 = .3
-
-        e1 = l1*sym.cos(self.theta0) + l2*sym.sin(self.theta0) + sym.cos(self.theta0) - px
-        e2 = l1*sym.sin(self.theta0) - l2*sym.cos(self.theta0) - sym.cos(self.theta0) + 2*l4*sym.cos(self.theta2)*sym.sin(self.theta0) - py
+        l3 = 2*l4_const*sym.cos(self.theta2)
+        e1 = l1_const*sym.cos(self.theta0) + l2_const*sym.sin(self.theta0) + l3*sym.cos(self.theta0) - px
+        e2 = l1_const*sym.sin(self.theta0) - l2_const*sym.cos(self.theta0) + l3*sym.sin(self.theta0) - py
 
         # e1 = self.e1.subs(px, self.px)
         # e2 = self.e2.subs(py, self.py)
@@ -111,10 +121,10 @@ class Solver():
                 # self.px,
                 # self.py
             ],
-            [0.1, 0.2]
+            [0.1, 0.1],
+            verify=False
         )
 
-        print(solution)
         return solution[0], solution[1]
 
 
@@ -144,19 +154,30 @@ if __name__ == "__main__":
     # test_two_segment_arm()
 
     T_0_3 = generate_symbolic_transform_matrix_3_0()
+    # embed()
     # print(T_0_3)
 
-    point = np.array([0, 0])
+    ## What's the initial position of the end effector when both servos are at their 0 positions
+    theta0 = theta2 = 0.
+    T_0_3 = generate_subs_transform_matrix_3_0(theta0, theta2)
+    fk_point = T_0_3.multiply(sym.Matrix([0,0,0,1]))
+    print("ForwardK thinks starting position of eef is %.2f %.2f" % (fk_point[0], fk_point[1]))
 
+    rough_x, rough_y = rough_and_dirty(theta0, theta2)
+    print("Rough and Dirty thinks starting position of eef is %.2f %.2f" % (rough_x, rough_y))
+    
+    point = np.array([fk_point[0], fk_point[1]])
+    print("Checking IK for ", point)
     s = Solver()
     theta0, theta2 = s.get_goal_thetas(point)
-
-    print("Solved to get %.2f, %2.f" % (theta0, theta2))
+    print("Solved to get %.2f, %.2f" % (theta0, theta2))
 
     T_0_3 = generate_subs_transform_matrix_3_0(theta0, theta2)
     fk_point = T_0_3.multiply(sym.Matrix([0,0,0,1]))
+    print("ForwardK thinkg derived thetas lead to %.2f %.2f" % (fk_point[0], fk_point[1]))
 
-    print("ForwardK expects ", fk_point)
+    rough_x, rough_y = rough_and_dirty(theta0, theta2)
+    print("Rough and Dirty thinks derived thetas lead to %.2f %.2f" % (rough_x, rough_y))
 
 
 
