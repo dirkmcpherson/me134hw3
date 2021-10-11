@@ -2,30 +2,40 @@
 # Arm driver
 # James Staley
 
+ON_RASPERRY_PI = False # Debug off the raspberry pi
+
 import time
 import random
-import board
-import busio
-import adafruit_pca9685
-from adafruit_servokit import ServoKit
+
+if (ON_RASPERRY_PI):
+    import board
+    import busio
+    import adafruit_pca9685
+    from adafruit_servokit import ServoKit
 
 from kinematics import Solver
 import numpy as np
+import math
 
 class Driver():
     def __init__(self):
-        # super(self).__init__()
-        # Set channels to the number of servo channels on your kit.
-        # 8 for FeatherWing, 16 for Shield/HAT/Bonnet.
-        # self.kit = ServoKit(channels=16)
-
-        self.axis0 = self.kit.servo[0] 
-        self.axis1 = self.kit.servo[1]
-        self.axis2 = self.kit.servo[2]
+        if (ON_RASPERRY_PI):
+            self.kit = ServoKit(channels=16)
+            self.axis0 = self.kit.servo[0] 
+            self.axis1 = self.kit.servo[1]
+            self.axis2 = self.kit.servo[2]
+        else:
+            print("WARNING: Running in Debug Configuration. WILL NOT WORK ON RASPBERRY PI.")
 
         # The global starting points for each letter we draw
+        # Offsets from our (0,0)
         X_OFFSET = 0.35
-        self.base_points = [(X_OFFSET,0), (X_OFFSET, 1), (X_OFFSET, 2)]
+        Y_OFFSET = 0.
+        self.base_points = [
+            (X_OFFSET, Y_OFFSET + 0), 
+            (X_OFFSET, Y_OFFSET + 1), 
+            (X_OFFSET, Y_OFFSET + 2)
+            ]
 
         self.solver = Solver()
 
@@ -51,22 +61,36 @@ class Driver():
         print("Converted %.1f radians to %.1f degrees" %(theta_rad,theta_deg))
 
         return theta_deg
-        
-    
+
+    def get_thetas(self, point):
+        theta0, theta1 = self.solver.get_goal_thetas(point)
+
+        while (theta0) > 2*math.pi:
+            theta0 -= 2*math.pi
+
+        while (theta1) > 2*math.pi:
+            theta1 -= 2*math.pi
+
+        print("         Solve for thetas: %.1f, %.1f" % (theta0, theta1))
+
+        theta0 = self.cap_and_convert_theta(np.array(theta0, dtype=float))
+        theta1 = self.cap_and_convert_theta(np.array(theta1, dtype=float))
+
+        return theta0, theta1
+
     def goto_point(self, p): # ignoring z since its up down
         print("         going to point ", p)
         # inverse kinematics to go from f(x,y) = [theta0, theta1]
         # we actually have a direct mapping from theta1 to x and theta2 to y
-        theta0, theta1 = self.solver.get_goal_thetas(p)
-
-        print("         Solve for thetas: %.1f, %.1f" % (theta0, theta1))
-
-        # angle = self.cap_and_convert_theta(np.array(theta0, dtype=float))
-        # angle = self.cap_and_convert_theta(np.array(theta1, dtype=float))
+        theta0, theta1 = self.get_thetas(p)
 
         # TODO: There definitely need to be a mapping from the derived thetas and the what's sent to the servos
-        self.axis0.angle = self.cap_and_convert_theta(np.array(theta0, dtype=float))
-        self.axis1.angle = self.cap_and_convert_theta(np.array(theta1, dtype=float))
+        if (ON_RASPERRY_PI):
+            self.axis0.angle = theta0
+            self.axis1.angle = theta1
+        else:
+            angle = theta0
+            angle = theta1
 
         
     def draw_letter(self, letter, reference_point):
@@ -93,12 +117,27 @@ class Driver():
             self.goto_point(base_point)
             self.draw_letter(l, base_point)
 
+    def produce_discrete_table(self):
+        '''
+        For debugging, produce a table of x,y,theta0,theta1 values
+        '''
+        X = np.linspace(0, 2., 10)
+        Y = np.linspace(0, 3., 10)
+        print("X    Y   th0   th2")
+        for x in X:
+            for y in Y:
+                th0, th2 = self.get_thetas([x,y])
+                print(f"{x:.2f}     {y:.2f}     {th0:.2f}      {th2:.2f}")
+
 
 if __name__ == "__main__":
     d = Driver()
     word = "|-" # not implemented. Just draw a straight vertical line and a straight horizontal line
     
-    d.run(word)
+    if ON_RASPERRY_PI:
+        d.run(word)
+    else:
+        d.produce_discrete_table()
 
     
 
