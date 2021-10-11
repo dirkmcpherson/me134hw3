@@ -32,10 +32,12 @@ class Driver():
         # Offsets from our (0,0) when theta0=theta2=0
         X_OFFSET = 0.2140
         Y_OFFSET = 0.0350
+
+        # Let's try to write in the y range of [-0.1, 0.1] and the x range of 0.1, 0.15] so we get a straight box
         self.base_points = [
-            (X_OFFSET, Y_OFFSET + 0), 
-            (X_OFFSET, Y_OFFSET + 1), 
-            (X_OFFSET, Y_OFFSET + 2)
+            (X_OFFSET + 0.1, Y_OFFSET + 0.33), 
+            (X_OFFSET + 0.1, Y_OFFSET + -0.33), 
+            (X_OFFSET + 0.1, Y_OFFSET + -0.1)
             ]
 
         self.solver = Solver()
@@ -48,11 +50,13 @@ class Driver():
         # pass
         # return a list of points for drawing this letter
 
+        # TODO map ranges min max of writing area
+
         # return [(random.random(), random.random()) for i in range(10)]
         if letter == "|":
-            return [(0.,0.1*i) for i in range(10)]
+            return [(0.,0.005*i) for i in range(10)] # [0 to 0.05] relative
         elif letter == "-":
-            return [(0.1*i, 0.) for i in range(10)]
+            return [(0.0066*i, 0.) for i in range(10)] # [0 to 0.066] relative
         else:
             raise ValueError("UNSUPPORTED LETTER")
 
@@ -60,8 +64,8 @@ class Driver():
         '''
         Convert theta to degrees and cap its value
         '''
-        MAX = 180.
-        MIN = 0.
+        MAX = 75.
+        MIN = -75.
         theta_deg = max(MIN, min(MAX, np.rad2deg(theta_rad)))
         print("         Converted %.1f radians to %.1f degrees" %(theta_rad,theta_deg))
 
@@ -93,7 +97,7 @@ class Driver():
         if (ON_RASPERRY_PI):
             if (self.prev_theta0 is not None and abs(self.prev_theta0 - theta0) > 0.1):
                 self.axis0.angle = theta0
-                
+
             if (self.prev_theta1 is not None and abs(self.prev_theta1 - theta1) > 0.1):
                 self.axis1.angle = theta1
         else:
@@ -150,8 +154,8 @@ class Driver():
 if __name__ == "__main__":
     d = Driver()
 
-    word = "|-" # not implemented. Just draw a straight vertical line and a straight horizontal line
     if ON_RASPERRY_PI:
+        word = "|-" # not implemented. Just draw a straight vertical line and a straight horizontal line
         d.run(word)
     else:
         d.get_zero_position()

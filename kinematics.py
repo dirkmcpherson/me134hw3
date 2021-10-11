@@ -1,6 +1,7 @@
 import sympy as sym
 from sympy.matrices import rot_axis3
 from IPython import embed
+import matplotlib.pyplot as plt
 # from math import sin, cos
 import math
 import numpy as np
@@ -10,9 +11,10 @@ l1_const = .034
 l2_const = .035
 # l3_const = .1 # for debugging
 l4_const = .09
+theta2_offset = np.deg2rad(67.) # The starting position of the joint
 
 def get_l3(theta2):
-    l3 = 2*l4_const*math.cos(theta2)
+    l3 = 2*l4_const*math.cos(theta2_offset + theta2)
     return l3
     # return l3_const
 
@@ -96,14 +98,14 @@ class Solver():
     def get_goal_thetas(self, point):
         px, py = point
 
-        l3 = 2*l4_const*sym.cos(self.theta2)
+        l3 = 2*l4_const*sym.cos(theta2_offset + self.theta2)
         e1 = l1_const*sym.cos(self.theta0) - l2_const*sym.sin(self.theta0) + l3*sym.cos(self.theta0) - px
         e2 = l1_const*sym.sin(self.theta0) + l2_const*sym.cos(self.theta0) + l3*sym.sin(self.theta0) - py
 
         # e1 = self.e1.subs(px, self.px)
         # e2 = self.e2.subs(py, self.py)
 
-        print("     Attempting to solve ik for x,y : %f, %f" % (px,py))
+        # print("     Attempting to solve ik for x,y : %f, %f" % (px,py))
         solution = sym.nsolve(
         # solution = sym.solve(
             [e1, e2],
@@ -121,14 +123,16 @@ class Solver():
             verify=False
         )
 
-        print(solution)
-        return solution[0], solution[1]
+        # print(solution)
+        return solution[0], (solution[1])
 
-    def zero_theta_position(self):
-        theta0 = theta2 = 0.
+    def fk(self, theta0, theta2):
         T_0_3 = generate_subs_transform_matrix_3_0(theta0, theta2)
         fk_point = T_0_3.multiply(sym.Matrix([0,0,0,1]))
         return fk_point
+
+    def zero_theta_position(self):
+        return self.fk(0., 0.)
     
     def l3_length_at(self, theta):
         return get_l3(theta)
@@ -157,10 +161,30 @@ class Solver():
 if __name__ == "__main__":
     # test with 2 length arm
     # test_two_segment_arm()
+    solver = Solver()
+    points = []
+    for theta0 in range(-75,75, 2):
+        # theta2 = 0.
+        for theta2 in range(-75,75, 2):
+        # theta0 = 0.
+            theta0 = np.deg2rad(np.float(theta0))
+            theta2 = np.deg2rad(np.float(theta2))
+            point = solver.fk(theta0, theta2)
+            point = (point[0], point[1])
+            points.append(point)
+            ik_theta0, ik_theta2 = solver.get_goal_thetas(point)
 
-    T_0_3 = generate_symbolic_transform_matrix_3_0()
-    T_0_3.simplify()
-    embed()
+            print(f"dtheta0 {(theta0 - ik_theta0):.2f} dtheta2 {(theta2 - ik_theta2):.2f}")
+
+
+    plt.scatter([p[0] for p in points], [p[1] for p in points])
+    plt.show()
+
+
+
+    # T_0_3 = generate_symbolic_transform_matrix_3_0()
+    # T_0_3.simplify()
+    # embed()
     # print(T_0_3)
 
     ## What's the initial position of the end effector when both servos are at their 0 positions
@@ -184,7 +208,3 @@ if __name__ == "__main__":
 
     # rough_x, rough_y = rough_and_dirty(theta0, theta2)
     # print("Rough and Dirty thinks derived thetas lead to %.2f %.2f" % (rough_x, rough_y))
-
-
-
-
