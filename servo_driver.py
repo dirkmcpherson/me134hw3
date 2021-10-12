@@ -27,6 +27,7 @@ TWO_UPPER_LIMIT = 110
 ONE_LOWER_LIMIT = 80
 ONE_UPPER_LIMIT = 140
 
+ZERO_POINT = 89
 
 class Driver():
     def __init__(self):
@@ -79,7 +80,9 @@ class Driver():
         '''
         MAX = 180.
         MIN = 0.
-        theta_deg = max(MIN, min(MAX, np.rad2deg(theta_rad)))
+        theta_deg = np.rad2deg(theta_rad)
+        theta_deg += ZERO_POINT
+        theta_deg = max(MIN, min(MAX, theta_deg))
         print("         Converted %.1f radians to %.1f degrees" %(theta_rad,theta_deg))
 
         return theta_deg
@@ -112,11 +115,15 @@ class Driver():
                 fangle0 = max(ONE_LOWER_LIMIT, min(ONE_UPPER_LIMIT, theta0))
                 print(f"     moving servo0 to {fangle0:0.1f}")
                 self.axis0.angle = fangle0
+            else:
+                print("       Skipping 0 because its close to origin")
 
             if (self.prev_theta1 is None or abs(self.prev_theta1 - theta1) > 0.1):
                 fangle1 = max(TWO_LOWER_LIMIT, min(TWO_UPPER_LIMIT, theta1))
                 print(f"     moving servo1 to {fangle1:0.1f}")
                 self.axis1.angle = fangle1
+            else:
+                print("       Skipping 1 because its close to origin")
         else:
             angle = theta0
             angle = theta1
