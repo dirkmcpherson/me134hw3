@@ -107,6 +107,7 @@ class Driver():
 
         theta0 = self.cap_and_convert_theta(np.array(theta0, dtype=float))
         theta1 = self.cap_and_convert_theta(np.array(theta1, dtype=float))
+        theta1 += 67.
 
         return theta0, theta1
 
