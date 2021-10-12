@@ -124,7 +124,8 @@ class Solver():
         )
 
         # print(solution)
-        return solution[0], (solution[1])
+        # embed()
+        return solution[0], solution[1]
 
     def fk(self, theta0, theta2):
         T_0_3 = generate_subs_transform_matrix_3_0(theta0, theta2)

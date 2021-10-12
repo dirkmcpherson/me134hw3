@@ -35,7 +35,7 @@ class Driver():
         # The global starting points for each letter we draw
         # Offsets from our (0,0) when theta0=theta2=0
         self.solver = Solver()
-        self.X_OFFSET = 0.2140
+        self.X_OFFSET = 0.1043
         self.Y_OFFSET = 0.0350
         self.prev_theta0 = None
         self.prev_theta1 = None
@@ -72,7 +72,7 @@ class Driver():
         if letter == "|":
             return [(0.,0.005*i) for i in range(10)] # [0 to 0.05] relative
         elif letter == "-":
-            return [(0.0066*i, 0.) for i in range(10)] # [0 to 0.066] relative
+            return [(0.066*i, 0.) for i in range(10)] # [0 to 0.066] relative
         else:
             raise ValueError("UNSUPPORTED LETTER")
 
@@ -96,10 +96,10 @@ class Driver():
     def get_thetas(self, point):
         theta0, theta1 = self.solver.get_goal_thetas(point)
 
-        while (theta0) > 2*math.pi:
+        while (theta0) >= 2*math.pi:
             theta0 -= 2*math.pi
 
-        while (theta1) > 2*math.pi:
+        while (theta1) >= 2*math.pi:
             theta1 -= 2*math.pi
 
         if DEBUG:
@@ -108,6 +108,7 @@ class Driver():
         theta0 = self.cap_and_convert_theta(np.array(theta0, dtype=float))
         theta1 = self.cap_and_convert_theta(np.array(theta1, dtype=float))
         # theta1 += 67. # hardcoded addition to its zero 
+        # theta1 = ZERO_POINT - theta1
 
         return theta0, theta1
 
@@ -206,14 +207,13 @@ if __name__ == "__main__":
         d.get_zero_position()
         # d.produce_discrete_table()
         test_points = []
-        test_points.append((d.X_OFFSET, d.Y_OFFSET)) # starting point for 0thetas
-        test_points.append((d.X_OFFSET - 0.005, d.Y_OFFSET)) # left a little
-        test_points.append((d.X_OFFSET + 0.005, d.Y_OFFSET)) # right a little 
+        for i in range(3):
+            test_points.append((d.X_OFFSET + 0.005*i, d.Y_OFFSET)) # left a little
         
         
-        test_points.append((d.X_OFFSET, d.Y_OFFSET)) # down a little
-        test_points.append((d.X_OFFSET, d.Y_OFFSET + 0.0025)) # up a little
-        test_points.append((d.X_OFFSET, d.Y_OFFSET - 0.0025)) # up a little
+        # for i in range(5):
+        #     test_points.append((d.X_OFFSET, d.Y_OFFSET + 0.005*i)) # up a little
+
         for p in test_points:
             d.goto_point(p)
         # d.goto_point((float(sys.argv[1]), float(sys.argv[2])))
