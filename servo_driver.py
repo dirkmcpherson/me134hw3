@@ -64,8 +64,8 @@ class Driver():
         '''
         Convert theta to degrees and cap its value
         '''
-        MAX = 75.
-        MIN = -75.
+        MAX = 90.
+        MIN = -90.
         theta_deg = max(MIN, min(MAX, np.rad2deg(theta_rad)))
         print("         Converted %.1f radians to %.1f degrees" %(theta_rad,theta_deg))
 

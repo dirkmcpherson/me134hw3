@@ -21,12 +21,26 @@ if __name__ == "__main__":
     s1 = sys.argv[2]
     s2 = sys.argv[3]
 
-    print(f"Setting servo positions to angles (degrees) {s0}, {s1}, {s2}")
+
 
     kit = ServoKit(channels=16)
     axis0 = kit.servo[0] 
     axis1 = kit.servo[1]
     axis2 = kit.servo[2]
+
+    s0 = int(s0)
+    s1 = int(s1)
+    s2 = int(s2)
+
+    start = 89
+
+    s0 = max(start-20, min(start+20, s0))
+    s1 = max(start-20, min(start+20, s1))
+    s2 = max(start-20, min(start+20, s2))
+
+
+    print(f"Setting servo positions to angles (degrees) {s0}, {s1}, {s2}")
+
 
     axis0.angle = s0
     axis1.angle = s1
