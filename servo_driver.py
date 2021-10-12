@@ -45,7 +45,7 @@ class Driver():
             self.axis1 = self.kit.servo[1]
             self.axis2 = self.kit.servo[2]
 
-            self.goto_point((X_OFFSET, Y_OFFSET))
+            self.goto_point((self.X_OFFSET, self.Y_OFFSET))
         else:
             print("WARNING: Running in Debug Configuration. WILL NOT WORK ON RASPBERRY PI.")
 
@@ -168,6 +168,12 @@ class Driver():
 
 if __name__ == "__main__":
     d = Driver()
+
+    if len(sys.argv) == 3:
+        x,y = float(sys.argv[1]), float(sys.argv[2])
+        d.goto_point((x,y))
+        sys.exit()
+        
 
     if ON_RASPERRY_PI:
         d.goto_point((0,0))
