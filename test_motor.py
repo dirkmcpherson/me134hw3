@@ -88,10 +88,6 @@ if __name__ == "__main__":
 
         start = 89
 
-        s0 = max(start-20, min(start+20, s0))
-        s1 = max(start-20, min(start+20, s1))
-        s2 = max(start-20, min(start+20, s2))
-
 
         print(f"Setting servo positions to angles (degrees) {s0}, {s1}, {s2}")
 
