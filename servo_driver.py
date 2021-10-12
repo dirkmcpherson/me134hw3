@@ -199,7 +199,7 @@ if __name__ == "__main__":
     if ON_RASPERRY_PI:
         d.goto_point((0,0))
         # word = "|-" 
-        word = "|"
+        word = "|-|"
         d.run(word)
     else:
         d.get_zero_position()

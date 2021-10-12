@@ -1,7 +1,7 @@
 import sympy as sym
 from sympy.matrices import rot_axis3
 from IPython import embed
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 # from math import sin, cos
 import math
 import numpy as np
