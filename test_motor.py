@@ -22,6 +22,8 @@ ONE_LOWER_LIMIT = 80
 ONE_UPPER_LIMIT = 140
 ONE_INC = 30
 
+SLEEP_INC = 0.05
+
 ONE_ZERO_POINT = ONE_LOWER_LIMIT + (ONE_UPPER_LIMIT - ONE_LOWER_LIMIT) / 2.
 TWO_ZERO_POINT = TWO_LOWER_LIMIT + (TWO_UPPER_LIMIT - TWO_LOWER_LIMIT) / 2.
 
@@ -46,13 +48,21 @@ class FastBoy():
 
     def make_letters(self):
         self.up()
+        time.sleep(SLEEP_INC)
         self.goto(ONE_ZERO_POINT, TWO_ZERO_POINT)
+        time.sleep(SLEEP_INC)
         self.down()
+        time.sleep(SLEEP_INC)
         self.goto(ONE_ZERO_POINT, TWO_ZERO_POINT - TWO_INC)
+        time.sleep(SLEEP_INC)
         self.up()
+        time.sleep(SLEEP_INC)
         self.goto(ONE_ZERO_POINT - ONE_INC, TWO_ZERO_POINT)
+        time.sleep(SLEEP_INC)
         self.down()
+        time.sleep(SLEEP_INC)
         self.goto(ONE_ZERO_POINT + ONE_INC, TWO_ZERO_POINT)
+        time.sleep(SLEEP_INC)
         self.up()
         
 
