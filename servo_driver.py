@@ -2,8 +2,8 @@
 # Arm driver
 # James Staley
 
-ON_RASPERRY_PI = False # Debug off the raspberry pi
-DEBUG = False
+ON_RASPERRY_PI = True # Debug off the raspberry pi
+DEBUG = True
 
 import time
 import random
