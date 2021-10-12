@@ -2,8 +2,9 @@
 # Arm driver
 # James Staley
 
-ON_RASPERRY_PI = True # Debug off the raspberry pi
+ON_RASPERRY_PI = False # Debug off the raspberry pi
 DEBUG = True
+HACK_THETA2 = True
 
 import time
 import random
@@ -29,6 +30,9 @@ ONE_LOWER_LIMIT = 80
 ONE_UPPER_LIMIT = 140
 
 ZERO_POINT = 89
+
+PICK_UP = (9,9)
+PUT_DOWN = (8,8)
 
 class Driver():
     def __init__(self):
@@ -73,8 +77,14 @@ class Driver():
             return [(0.,0.005*i) for i in range(10)] # [0 to 0.05] relative
         elif letter == "-":
             return [(0.066*i, 0.) for i in range(10)] # [0 to 0.066] relative
+        elif letter == 'c':
+            return [(1,1), (-1,1), (-1,-1), (1,-1)]
+        elif letter == 't':
+            return [(-1, 1), PUT_DOWN, (1,1), PICK_UP, (0,1), PUT_DOWN, (0,-1)]
+        # elif letter == 'm':
+        #     return [(-1,-1), ]
         else:
-            raise ValueError("UNSUPPORTED LETTER")
+            raise ValueError(f"UNSUPPORTED LETTER {letter}")
 
     def cap_and_convert_theta(self, theta_rad):
         '''
@@ -96,6 +106,9 @@ class Driver():
     def get_thetas(self, point):
         theta0, theta1 = self.solver.get_goal_thetas(point)
 
+        if (HACK_THETA2):
+            theta1 = self.hack_theta2(point[0])
+
         while (theta0) >= 2*math.pi:
             theta0 -= 2*math.pi
 
@@ -112,6 +125,15 @@ class Driver():
 
         return theta0, theta1
 
+    def hack_theta2(self, d):
+        d -= self.X_OFFSET
+
+        l4_const = .09
+        # l3 = 2*l4_const*math.cos(theta2_offset + theta2)
+        return math.acos(d / (2*l4_const))
+
+        
+    
     def goto_point(self, p): # ignoring z since its up down
         print("Going to point ", p)
         # inverse kinematics to go from f(x,y) = [theta0, theta1]
@@ -142,8 +164,6 @@ class Driver():
         else:
             print(f"theta0 {theta0:.2f} theta1 {theta1:.2f}")
 
-
-        
     def draw_letter(self, letter, reference_point):
         '''
         Draw a letter from a list of points.
@@ -152,9 +172,16 @@ class Driver():
         self.axis2.angle = TURTLE_DOWN
         points = self.letter_to_points(letter)
         for p in points:
+            if (p[0] == PUT_DOWN[0] and p[1] == PUT_DOWN[1]):
+                self.axis2.angle = TURTLE_DOWN
+                continue
+            elif (p[0] == PICK_UP[0] and p[1] == PICK_UP[1]):
+                self.axis2.angle = TURTLE_UP
+                continue
+
             rel_point = (p[0] + reference_point[0], p[1] + reference_point[1])
             self.goto_point(rel_point)
-            time.sleep(0.1)
+            time.sleep(0.025)
         self.axis2.angle = TURTLE_UP
 
     def run(self, word):
