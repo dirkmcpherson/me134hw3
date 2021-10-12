@@ -2,7 +2,7 @@
 # Arm driver
 # James Staley
 
-ON_RASPERRY_PI = False # Debug off the raspberry pi
+ON_RASPERRY_PI = True # Debug off the raspberry pi
 DEBUG = True
 HACK_THETA2 = True
 
