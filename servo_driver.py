@@ -2,7 +2,7 @@
 # Arm driver
 # James Staley
 
-ON_RASPERRY_PI = False # Debug off the raspberry pi
+ON_RASPERRY_PI = True # Debug off the raspberry pi
 DEBUG = False
 HACK_THETA2 = False
 
@@ -172,6 +172,8 @@ class Driver():
         # inverse kinematics to go from f(x,y) = [theta0, theta1]
         # we actually have a direct mapping from theta1 to x and theta2 to y
         theta0, theta1 = self.get_thetas(p)
+        fangle0 = theta0
+        fangle1 = theta1
 
         # TODO: There definitely need to be a mapping from the derived thetas and the what's sent to the servos
         if (ON_RASPERRY_PI):

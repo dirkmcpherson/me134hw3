@@ -68,39 +68,40 @@ class FastBoy():
 
 
 if __name__ == "__main__":
-    fb = FastBoy()
-    fb.make_letters()
-    # if len(sys.argv) < 4:
-    #     print("ERROR: usage is $python test_motor.py {servo0_cmd} {servo1_cmd} {servo2_cmd}")
-    #     print("Please enter a value for each of the three servos.")
-    #     sys.exit()
+    if len(sys.argv) == 4:
+        # print("ERROR: usage is $python test_motor.py {servo0_cmd} {servo1_cmd} {servo2_cmd}")
+        # print("Please enter a value for each of the three servos.")
+        # sys.exit()
 
-    # s0 = sys.argv[1]
-    # s1 = sys.argv[2]
-    # s2 = sys.argv[3]
+        s0 = sys.argv[1]
+        s1 = sys.argv[2]
+        s2 = sys.argv[3]
 
-    # kit = ServoKit(channels=16)
-    # axis0 = kit.servo[0] 
-    # axis1 = kit.servo[1]
-    # axis2 = kit.servo[2]
+        kit = ServoKit(channels=16)
+        axis0 = kit.servo[0] 
+        axis1 = kit.servo[1]
+        axis2 = kit.servo[2]
 
-    # s0 = int(s0)
-    # s1 = int(s1)
-    # s2 = int(s2)
+        s0 = int(s0)
+        s1 = int(s1)
+        s2 = int(s2)
 
-    # start = 89
+        start = 89
 
-    # s0 = max(start-20, min(start+20, s0))
-    # s1 = max(start-20, min(start+20, s1))
-    # s2 = max(start-20, min(start+20, s2))
+        s0 = max(start-20, min(start+20, s0))
+        s1 = max(start-20, min(start+20, s1))
+        s2 = max(start-20, min(start+20, s2))
 
 
-    # print(f"Setting servo positions to angles (degrees) {s0}, {s1}, {s2}")
+        print(f"Setting servo positions to angles (degrees) {s0}, {s1}, {s2}")
 
 
-    # axis0.angle = s0
-    # axis1.angle = s1
-    # axis2.angle = s2
+        axis0.angle = s0
+        axis1.angle = s1
+        axis2.angle = s2
+    else:
+        fb = FastBoy()
+        fb.make_letters()
 
     
 
