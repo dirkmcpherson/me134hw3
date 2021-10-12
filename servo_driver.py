@@ -82,6 +82,9 @@ class Driver():
         '''
         MAX = 180.
         MIN = 0.
+        if (theta_rad > math.pi):
+            theta_rad -= 2*math.pi
+
         theta_deg = np.rad2deg(theta_rad)
         theta_deg += ZERO_POINT
         theta_deg = max(MIN, min(MAX, theta_deg))
@@ -126,7 +129,8 @@ class Driver():
 
             if (self.prev_theta1 is None or abs(self.prev_theta1 - theta1) > 0.1):
                 fangle1 = max(TWO_LOWER_LIMIT, min(TWO_UPPER_LIMIT, theta1))
-                print(f"     moving servo1 to {fangle1:0.1f}")
+                if DEBUG:
+                    print(f"     moving servo1 to {fangle1:0.1f}")
                 self.axis1.angle = fangle1
             else:
                 if DEBUG:
