@@ -109,12 +109,12 @@ class Solver():
         pz = 0
 
         l3 = 2*l4_const*sym.cos(theta2_offset + self.theta2)
-        # e1 = l1_const*sym.cos(self.theta0) - l2_const*sym.sin(self.theta0) + l3*sym.cos(self.theta0) - px
-        # e2 = l1_const*sym.sin(self.theta0) + l2_const*sym.cos(self.theta0) + l3*sym.sin(self.theta0) - py
+        e1 = l1_const*sym.cos(self.theta0) - l2_const*sym.sin(self.theta0) + l3*sym.cos(self.theta0) - px
+        e2 = l1_const*sym.sin(self.theta0) + l2_const*sym.cos(self.theta0) + l3*sym.sin(self.theta0) - py
 
-        e1 = 0.069*sym.cos(self.theta0) - px
-        e2 = 0.069*sym.sin(self.theta0) - py
-        e3 = l3 - pz
+        # e1 = 0.069*sym.cos(self.theta0) - px
+        # e2 = 0.069*sym.sin(self.theta0) - py
+        # e3 = l3 - pz
 
 
         # e1 = self.e1.subs(px, self.px)
@@ -138,7 +138,7 @@ class Solver():
             verify=False
         )
 
-        print(solution)
+        # print(solution)
         # embed()
         return solution[0], solution[1]
 

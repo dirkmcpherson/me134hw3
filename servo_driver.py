@@ -3,7 +3,7 @@
 # James Staley
 
 ON_RASPERRY_PI = False # Debug off the raspberry pi
-DEBUG = True
+DEBUG = False
 HACK_THETA2 = False
 
 import time
@@ -65,6 +65,9 @@ class Driver():
             # (self.X_OFFSET + 0.1, self.Y_OFFSET + -0.1)
             ]
 
+    def is_meta_point(self, pt):
+        return (pt[0] == PICK_UP[0] or pt[0] == PUT_DOWN[0])
+
 
     def letter_to_points(self, letter):
         # pass
@@ -76,15 +79,45 @@ class Driver():
         if letter == "|":
             return [(0.,0.005*i) for i in range(10)] # [0 to 0.05] relative
         elif letter == "-":
-            return [(0.066*i, 0.) for i in range(10)] # [0 to 0.066] relative
+            return [(0.005*i, 0.) for i in range(10)] # [0 to 0.066] relative
         elif letter == 'c':
-            return [(1,1), (-1,1), (-1,-1), (1,-1)]
+            pts = [(1,1), (0,1), (-1,1), (-1,0), (-1,-1), (0,-1), (1,-1)]
+            interpolate = True
         elif letter == 't':
-            return [(-1, 1), PUT_DOWN, (1,1), PICK_UP, (0,1), PUT_DOWN, (0,-1)]
+            pts = [(-1, 1), PUT_DOWN, (0, 1), (1,1), PICK_UP, (0,1), PUT_DOWN, (0,0), (0,-1)]
+            # pts = [(-1, 1), (1,1), (0,1), (0,-1)]
+            interpolate = True
         # elif letter == 'm':
         #     return [(-1,-1), ]
+        elif letter == '0':
+            pts = [(-1,-1), (-1,1), (1,1), (1,-1)]
         else:
             raise ValueError(f"UNSUPPORTED LETTER {letter}")
+
+        # if interpolate:
+        #     new_pts = []
+        #     for i in range(1,len(pts)):
+        #         p0 = pts[i-1]
+        #         p1 = pts[i]
+
+        #         new_pts.append(p0)
+        #         newpt = ((p1[0] - p0[0]) / 2., (p1[1] - p0[1]) / 2.)
+        #         new_pts.append(newpt)
+        #     new_pts.append(pts[-1])
+        #     pts = new_pts
+
+        print(pts)
+        plt.scatter([entry[0] for entry in pts if not self.is_meta_point(entry)], [entry[1] for entry in pts if not self.is_meta_point(entry)])
+        plt.show()
+
+        # if letter == 't':
+        #     pts.insert(1, PUT_DOWN)
+        #     pts.insert(4, PICK_UP)
+        #     pts.insert(7, PUT_DOWN)
+        #     print(pts)
+
+
+        return pts
 
     def cap_and_convert_theta(self, theta_rad):
         '''
@@ -135,7 +168,7 @@ class Driver():
         
     
     def goto_point(self, p): # ignoring z since its up down
-        print("Going to point ", p)
+        if DEBUG: print("Going to point ", p)
         # inverse kinematics to go from f(x,y) = [theta0, theta1]
         # we actually have a direct mapping from theta1 to x and theta2 to y
         theta0, theta1 = self.get_thetas(p)
@@ -144,45 +177,49 @@ class Driver():
         if (ON_RASPERRY_PI):
             if (self.prev_theta0 is None or abs(self.prev_theta0 - theta0) > 0.1):
                 fangle0 = max(ONE_LOWER_LIMIT, min(ONE_UPPER_LIMIT, theta0))
-                if DEBUG:
-                    print(f"     moving servo0 to {fangle0:0.1f}")
+                if DEBUG:print(f"     moving servo0 to {fangle0:0.1f}")
                 self.axis0.angle = fangle0
                 self.prev_theta0 = fangle0
             else:
-                if DEBUG:
-                    print(f"       Skipping 0 {theta0:.2f} because its close to current position")
+                if DEBUG:print(f"       Skipping 0 {theta0:.2f} because its close to current position")
 
             if (self.prev_theta1 is None or abs(self.prev_theta1 - theta1) > 0.1):
                 fangle1 = max(TWO_LOWER_LIMIT, min(TWO_UPPER_LIMIT, theta1))
-                if DEBUG:
-                    print(f"     moving servo1 to {fangle1:0.1f}")
+                if DEBUG:print(f"     moving servo1 to {fangle1:0.1f}")
                 self.axis1.angle = fangle1
                 self.prev_theta1 = fangle1
             else:
-                if DEBUG:
-                    print(f"       Skipping 1 {theta1:.2f} because its close to current position")
+                if DEBUG:print(f"       Skipping 1 {theta1:.2f} because its close to current position")
         else:
-            print(f"theta0 {theta0:.2f} theta1 {theta1:.2f}")
+            fangle0 = max(ONE_LOWER_LIMIT, min(ONE_UPPER_LIMIT, theta0))
+            fangle1 = max(TWO_LOWER_LIMIT, min(TWO_UPPER_LIMIT, theta1))
+            print(f"theta0 {fangle0:.2f} theta1 {fangle1:.2f} for point {p}")
+
+        return (fangle0, fangle1)
 
     def draw_letter(self, letter, reference_point):
         '''
         Draw a letter from a list of points.
         Draw w/r to a base point
         '''
-        self.axis2.angle = TURTLE_DOWN
+        fangles = []
+        if (ON_RASPERRY_PI): self.axis2.angle = TURTLE_DOWN
         points = self.letter_to_points(letter)
         for p in points:
             if (p[0] == PUT_DOWN[0] and p[1] == PUT_DOWN[1]):
-                self.axis2.angle = TURTLE_DOWN
+                if (ON_RASPERRY_PI): self.axis2.angle = TURTLE_DOWN
                 continue
             elif (p[0] == PICK_UP[0] and p[1] == PICK_UP[1]):
-                self.axis2.angle = TURTLE_UP
+                if (ON_RASPERRY_PI): self.axis2.angle = TURTLE_UP
                 continue
 
-            rel_point = (p[0] + reference_point[0], p[1] + reference_point[1])
-            self.goto_point(rel_point)
+            scale_factor = 0.0075
+            rel_point = (scale_factor*p[0] + reference_point[0], scale_factor*p[1] + reference_point[1])
+            fangles.append(self.goto_point(rel_point))
+
             time.sleep(0.025)
-        self.axis2.angle = TURTLE_UP
+        if (ON_RASPERRY_PI): self.axis2.angle = TURTLE_UP
+        return fangles
 
     def run(self, word):
         print("Writing ", word)
@@ -195,7 +232,8 @@ class Driver():
             base_point = self.base_points[0]
             print("   going to base point %d: (%.1f, %.1f)" % (idx, base_point[0], base_point[1]))
             self.goto_point(base_point)
-            self.draw_letter(l, base_point)
+            fangles = self.draw_letter(l, base_point)
+        return fangles
 
     def produce_discrete_table(self):
         '''
@@ -232,6 +270,12 @@ if __name__ == "__main__":
         word = "-"
         d.run(word)
     else:
+        import matplotlib.pyplot as plt
+        word = "t" #ct"
+        fangles = d.run(word)
+        plt.scatter([entry[0] for entry in fangles], [entry[1] for entry in fangles])
+        plt.show()
+
         d.get_zero_position()
         # d.produce_discrete_table()
         test_points = []
