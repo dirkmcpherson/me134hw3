@@ -18,6 +18,16 @@ import numpy as np
 import math
 import sys
 
+TURTLE_DOWN = 55
+TURTLE_UP = 40
+
+TWO_LOWER_LIMIT = 80
+TWO_UPPER_LIMIT = 110
+
+ONE_LOWER_LIMIT = 80
+ONE_UPPER_LIMIT = 140
+
+
 class Driver():
     def __init__(self):
         if (ON_RASPERRY_PI):
@@ -96,10 +106,10 @@ class Driver():
         # TODO: There definitely need to be a mapping from the derived thetas and the what's sent to the servos
         if (ON_RASPERRY_PI):
             if (self.prev_theta0 is not None and abs(self.prev_theta0 - theta0) > 0.1):
-                self.axis0.angle = theta0
+                self.axis0.angle = max(ONE_LOWER_LIMIT, min(ONE_UPPER_LIMIT, theta0))
 
             if (self.prev_theta1 is not None and abs(self.prev_theta1 - theta1) > 0.1):
-                self.axis1.angle = theta1
+                self.axis1.angle = max(TWO_LOWER_LIMIT, min(TWO_UPPER_LIMIT, theta1))
         else:
             angle = theta0
             angle = theta1
@@ -113,11 +123,13 @@ class Driver():
         Draw a letter from a list of points.
         Draw w/r to a base point
         '''
+        self.axis2.angle = TURTLE_DOWN
         points = self.letter_to_points(letter)
         for p in points:
             rel_point = (p[0] + reference_point[0], p[1] + reference_point[1])
             self.goto_point(p)
             time.sleep(0.1)
+        self.axis2.angle = TURTLE_UP
 
     def run(self, word):
         print("Writing ", word)
