@@ -27,7 +27,7 @@ TWO_ZERO_POINT = TWO_LOWER_LIMIT + (TWO_UPPER_LIMIT - TWO_LOWER_LIMIT) / 2.
 
 class FastBoy():
     def __init__(self):
-        self.kit = ServoKit(channels=16)
+        kit = ServoKit(channels=16)
         self.axis0 = kit.servo[0] 
         self.axis1 = kit.servo[1]
         self.axis2 = kit.servo[2]
@@ -45,15 +45,15 @@ class FastBoy():
         self.axis1.angle = max(TWO_LOWER_LIMIT, min(TWO_UPPER_LIMIT, th1))
 
     def make_letters(self):
-        up()
-        goto(ONE_ZERO_POINT, TWO_ZERO_POINT)
-        down()
-        goto(ONE_ZERO_POINT, TWO_ZERO_POINT - TWO_INC)
-        up()
-        goto(ONE_ZERO_POINT - ONE_INC, TWO_ZERO_POINT)
-        down()
-        goto(ONE_ZERO_POINT + ONE_INC, TWO_ZERO_POINT)
-        up()
+        self.up()
+        self.goto(ONE_ZERO_POINT, TWO_ZERO_POINT)
+        self.down()
+        self.goto(ONE_ZERO_POINT, TWO_ZERO_POINT - TWO_INC)
+        self.up()
+        self.goto(ONE_ZERO_POINT - ONE_INC, TWO_ZERO_POINT)
+        self.down()
+        self.goto(ONE_ZERO_POINT + ONE_INC, TWO_ZERO_POINT)
+        self.up()
         
 
 
