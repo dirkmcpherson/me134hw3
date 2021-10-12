@@ -22,7 +22,7 @@ import math
 import sys
 
 TURTLE_DOWN = 70
-TURTLE_UP = 40
+TURTLE_UP = 25
 
 TWO_LOWER_LIMIT = 80
 TWO_UPPER_LIMIT = 110
@@ -205,22 +205,30 @@ class Driver():
         Draw w/r to a base point
         '''
         fangles = []
-        if (ON_RASPERRY_PI): self.axis2.angle = TURTLE_DOWN
+        if (ON_RASPERRY_PI): 
+            self.axis2.angle = TURTLE_DOWN
+            time.sleep(0.1)
         points = self.letter_to_points(letter)
         for p in points:
             if (p[0] == PUT_DOWN[0] and p[1] == PUT_DOWN[1]):
-                if (ON_RASPERRY_PI): self.axis2.angle = TURTLE_DOWN
+                if (ON_RASPERRY_PI): 
+                    self.axis2.angle = TURTLE_DOWN
+                    time.sleep(0.1)
                 continue
             elif (p[0] == PICK_UP[0] and p[1] == PICK_UP[1]):
-                if (ON_RASPERRY_PI): self.axis2.angle = TURTLE_UP
+                if (ON_RASPERRY_PI): 
+                    self.axis2.angle = TURTLE_UP
+                    time.sleep(0.1)
                 continue
 
-            scale_factor = 0.02
+            scale_factor = 0.03
             rel_point = (scale_factor*p[0] + reference_point[0], scale_factor*p[1] + reference_point[1])
             fangles.append(self.goto_point(rel_point))
 
             time.sleep(0.025)
-        if (ON_RASPERRY_PI): self.axis2.angle = TURTLE_UP
+        if (ON_RASPERRY_PI): 
+            self.axis2.angle = TURTLE_UP
+            time.sleep(0.1)
         return fangles
 
     def run(self, word):
