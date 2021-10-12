@@ -2,12 +2,13 @@
 # Arm driver
 # James Staley
 
-ON_RASPERRY_PI = True # Debug off the raspberry pi
+ON_RASPERRY_PI = False # Debug off the raspberry pi
 DEBUG = True
-HACK_THETA2 = True
+HACK_THETA2 = False
 
 import time
 import random
+from IPython import embed
 
 if (ON_RASPERRY_PI):
     import board
@@ -213,7 +214,8 @@ class Driver():
         # Based on forward kinematics what're the thetas associated with getting the eef to (0,0)
         p = self.solver.zero_theta_position()
         l3 = self.solver.l3_length_at(0.)
-        print(f"Zero theta puts eef at {p[0]:.4f}, {p[1]:.4f}. l3 starts out at length {l3:.4f}.")
+        # embed()
+        print(f"Zero theta puts eef at {p[0]}, {p[1]}. l3 starts out at length {l3}.")
 
 
 if __name__ == "__main__":

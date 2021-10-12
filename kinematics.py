@@ -51,19 +51,28 @@ link    a   alpha   d   theta
 ## Create the symbols where everyone can see them
 theta0, theta1, l1, l2, l3 = sym.symbols('theta0 theta1 l1 l2 l3') # theta0,1 are control parameters
 def generate_symbolic_transform_matrix_3_0():
-    A_0_1 = create_A_from_table(l1, 0, 0, theta0)
-    A_1_2 = create_A_from_table(l2, 0, 0, math.pi/2)
-    A_2_3 = create_A_from_table(l3, 0, 0, -math.pi/2)
+    A_0_1 = create_A_from_table(l1_const, 0, 0, theta0)
+    A_1_2 = create_A_from_table(l2_const, math.pi / 2, l3, 0)
+    return A_0_1.multiply(A_1_2)
 
-    return A_0_1.multiply(A_1_2).multiply(A_2_3)
+    # A_0_1 = create_A_from_table(l1, 0, 0, theta0)
+    # A_1_2 = create_A_from_table(l2, 0, 0, math.pi/2)
+    # A_2_3 = create_A_from_table(l3, 0, 0, -math.pi/2)
+
+    # return A_0_1.multiply(A_1_2).multiply(A_2_3)
 
 def generate_subs_transform_matrix_3_0(theta0, theta2):
-    l3 = get_l3(theta2)
+    d = get_l3(theta2)
     A_0_1 = create_A_from_table(l1_const, 0, 0, theta0)
-    A_1_2 = create_A_from_table(l2_const, 0, 0, math.pi/2)
-    A_2_3 = create_A_from_table(l3, 0, 0, -math.pi/2)
+    A_1_2 = create_A_from_table(l2_const, math.pi/2, d, 0)
+    return A_0_1.multiply(A_1_2)
 
-    return A_0_1.multiply(A_1_2).multiply(A_2_3)
+    # l3 = get_l3(theta2)
+    # A_0_1 = create_A_from_table(l1_const, 0, 0, theta0)
+    # A_1_2 = create_A_from_table(l2_const, 0, 0, math.pi/2)
+    # A_2_3 = create_A_from_table(l3, 0, 0, -math.pi/2)
+
+    # return A_0_1.multiply(A_1_2).multiply(A_2_3)
 
 '''
 The rough and dirty hack-check on where the end effector should be given theta0, theta2 and our simplified kinematic chain
@@ -97,10 +106,16 @@ class Solver():
 
     def get_goal_thetas(self, point):
         px, py = point
+        pz = 0
 
         l3 = 2*l4_const*sym.cos(theta2_offset + self.theta2)
-        e1 = l1_const*sym.cos(self.theta0) - l2_const*sym.sin(self.theta0) + l3*sym.cos(self.theta0) - px
-        e2 = l1_const*sym.sin(self.theta0) + l2_const*sym.cos(self.theta0) + l3*sym.sin(self.theta0) - py
+        # e1 = l1_const*sym.cos(self.theta0) - l2_const*sym.sin(self.theta0) + l3*sym.cos(self.theta0) - px
+        # e2 = l1_const*sym.sin(self.theta0) + l2_const*sym.cos(self.theta0) + l3*sym.sin(self.theta0) - py
+
+        e1 = 0.069*sym.cos(self.theta0) - px
+        e2 = 0.069*sym.sin(self.theta0) - py
+        e3 = l3 - pz 
+
 
         # e1 = self.e1.subs(px, self.px)
         # e2 = self.e2.subs(py, self.py)
@@ -108,7 +123,7 @@ class Solver():
         # print("     Attempting to solve ik for x,y : %f, %f" % (px,py))
         solution = sym.nsolve(
         # solution = sym.solve(
-            [e1, e2],
+            [e1, e2, e3],
             [
                 # self.l1,
                 # self.l2,
@@ -119,7 +134,7 @@ class Solver():
                 # self.px,
                 # self.py
             ],
-            [0.001, 0.001], # don't start at zeros to avoid matrix problems
+            [0.001, -0.001], # don't start at zeros to avoid matrix problems
             verify=False
         )
 
@@ -162,31 +177,31 @@ class Solver():
 if __name__ == "__main__":
     # test with 2 length arm
     # test_two_segment_arm()
-    solver = Solver()
-    points = []
-    for theta0 in range(-75,75, 2):
-        # theta2 = 0.
-        for theta2 in range(-75,75, 2):
-        # theta0 = 0.
-            theta0 = np.deg2rad(np.float(theta0))
-            theta2 = np.deg2rad(np.float(theta2))
-            point = solver.fk(theta0, theta2)
-            point = (point[0], point[1])
-            points.append(point)
-            ik_theta0, ik_theta2 = solver.get_goal_thetas(point)
+    # solver = Solver()
+    # points = []
+    # for theta0 in range(-75,75, 2):
+    #     # theta2 = 0.
+    #     for theta2 in range(-75,75, 2):
+    #     # theta0 = 0.
+    #         theta0 = np.deg2rad(np.float(theta0))
+    #         theta2 = np.deg2rad(np.float(theta2))
+    #         point = solver.fk(theta0, theta2)
+    #         point = (point[0], point[1])
+    #         points.append(point)
+    #         ik_theta0, ik_theta2 = solver.get_goal_thetas(point)
 
-            print(f"dtheta0 {(theta0 - ik_theta0):.2f} dtheta2 {(theta2 - ik_theta2):.2f}")
-
-
-    plt.scatter([p[0] for p in points], [p[1] for p in points])
-    plt.show()
+    #         print(f"dtheta0 {(theta0 - ik_theta0):.2f} dtheta2 {(theta2 - ik_theta2):.2f}")
 
 
+    # plt.scatter([p[0] for p in points], [p[1] for p in points])
+    # plt.show()
 
-    # T_0_3 = generate_symbolic_transform_matrix_3_0()
-    # T_0_3.simplify()
-    # embed()
-    # print(T_0_3)
+
+
+    T_0_3 = generate_symbolic_transform_matrix_3_0()
+    T_0_3.simplify()
+    embed()
+    print(T_0_3)
 
     ## What's the initial position of the end effector when both servos are at their 0 positions
     # theta0 = theta2 = 0.
