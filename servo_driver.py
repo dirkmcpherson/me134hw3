@@ -109,10 +109,14 @@ class Driver():
         # TODO: There definitely need to be a mapping from the derived thetas and the what's sent to the servos
         if (ON_RASPERRY_PI):
             if (self.prev_theta0 is not None and abs(self.prev_theta0 - theta0) > 0.1):
-                self.axis0.angle = max(ONE_LOWER_LIMIT, min(ONE_UPPER_LIMIT, theta0))
+                fangle0 = max(ONE_LOWER_LIMIT, min(ONE_UPPER_LIMIT, theta0))
+                print(f"     moving servo0 to {fangle0:0.1f}")
+                self.axis0.angle = fangle0
 
             if (self.prev_theta1 is not None and abs(self.prev_theta1 - theta1) > 0.1):
-                self.axis1.angle = max(TWO_LOWER_LIMIT, min(TWO_UPPER_LIMIT, theta1))
+                fangle1 = max(TWO_LOWER_LIMIT, min(TWO_UPPER_LIMIT, theta1))
+                print(f"     moving servo1 to {fangle1:0.1f}")
+                self.axis1.angle = fangle1
         else:
             angle = theta0
             angle = theta1
