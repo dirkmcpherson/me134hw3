@@ -18,7 +18,7 @@ import numpy as np
 import math
 import sys
 
-TURTLE_DOWN = 55
+TURTLE_DOWN = 70
 TURTLE_UP = 40
 
 TWO_LOWER_LIMIT = 80
@@ -30,31 +30,34 @@ ONE_UPPER_LIMIT = 140
 
 class Driver():
     def __init__(self):
+        # The global starting points for each letter we draw
+        # Offsets from our (0,0) when theta0=theta2=0
+        self.solver = Solver()
+        self.X_OFFSET = 0.2140
+        self.Y_OFFSET = 0.0350
+        self.prev_theta0 = None
+        self.prev_theta1 = None
+        self.prev_theta2 = None
+
         if (ON_RASPERRY_PI):
             self.kit = ServoKit(channels=16)
             self.axis0 = self.kit.servo[0] 
             self.axis1 = self.kit.servo[1]
             self.axis2 = self.kit.servo[2]
+
+            self.goto_point((X_OFFSET, Y_OFFSET))
         else:
             print("WARNING: Running in Debug Configuration. WILL NOT WORK ON RASPBERRY PI.")
 
-        # The global starting points for each letter we draw
-        # Offsets from our (0,0) when theta0=theta2=0
-        X_OFFSET = 0.2140
-        Y_OFFSET = 0.0350
+
 
         # Let's try to write in the y range of [-0.1, 0.1] and the x range of 0.1, 0.15] so we get a straight box
         self.base_points = [
-            (X_OFFSET + 0.1, Y_OFFSET + 0.33), 
-            (X_OFFSET + 0.1, Y_OFFSET + -0.33), 
-            (X_OFFSET + 0.1, Y_OFFSET + -0.1)
+            (self.X_OFFSET + 0.1, self.Y_OFFSET + 0.33), 
+            (self.X_OFFSET + 0.1, self.Y_OFFSET + -0.33), 
+            (self.X_OFFSET + 0.1, self.Y_OFFSET + -0.1)
             ]
 
-        self.solver = Solver()
-
-        self.prev_theta0 = None
-        self.prev_theta1 = None
-        self.prev_theta2 = None
 
     def letter_to_points(self, letter):
         # pass
@@ -74,8 +77,8 @@ class Driver():
         '''
         Convert theta to degrees and cap its value
         '''
-        MAX = 90.
-        MIN = -90.
+        MAX = 180.
+        MIN = 0.
         theta_deg = max(MIN, min(MAX, np.rad2deg(theta_rad)))
         print("         Converted %.1f radians to %.1f degrees" %(theta_rad,theta_deg))
 
@@ -167,7 +170,9 @@ if __name__ == "__main__":
     d = Driver()
 
     if ON_RASPERRY_PI:
-        word = "|-" # not implemented. Just draw a straight vertical line and a straight horizontal line
+        d.goto_point((0,0))
+        # word = "|-" 
+        word = "|"
         d.run(word)
     else:
         d.get_zero_position()
