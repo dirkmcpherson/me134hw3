@@ -2,7 +2,8 @@
 # Arm driver
 # James Staley
 
-ON_RASPERRY_PI = True # Debug off the raspberry pi
+ON_RASPERRY_PI = False # Debug off the raspberry pi
+DEBUG = False
 
 import time
 import random
@@ -54,9 +55,10 @@ class Driver():
 
         # Let's try to write in the y range of [-0.1, 0.1] and the x range of 0.1, 0.15] so we get a straight box
         self.base_points = [
-            (self.X_OFFSET + 0.1, self.Y_OFFSET + 0.33), 
-            (self.X_OFFSET + 0.1, self.Y_OFFSET + -0.33), 
-            (self.X_OFFSET + 0.1, self.Y_OFFSET + -0.1)
+            (self.X_OFFSET, self.Y_OFFSET)
+            # (self.X_OFFSET + 0.1, self.Y_OFFSET + 0.33), 
+            # (self.X_OFFSET + 0.1, self.Y_OFFSET + -0.33), 
+            # (self.X_OFFSET + 0.1, self.Y_OFFSET + -0.1)
             ]
 
 
@@ -83,7 +85,8 @@ class Driver():
         theta_deg = np.rad2deg(theta_rad)
         theta_deg += ZERO_POINT
         theta_deg = max(MIN, min(MAX, theta_deg))
-        print("         Converted %.1f radians to %.1f degrees" %(theta_rad,theta_deg))
+        if DEBUG:
+            print("         Converted %.1f radians to %.1f degrees" %(theta_rad,theta_deg))
 
         return theta_deg
 
@@ -96,7 +99,8 @@ class Driver():
         while (theta1) > 2*math.pi:
             theta1 -= 2*math.pi
 
-        print("         Solved for thetas: %.1f, %.1f" % (theta0, theta1))
+        if DEBUG:
+            print("         Solved for thetas: %.1f, %.1f" % (theta0, theta1))
 
         theta0 = self.cap_and_convert_theta(np.array(theta0, dtype=float))
         theta1 = self.cap_and_convert_theta(np.array(theta1, dtype=float))
@@ -113,20 +117,22 @@ class Driver():
         if (ON_RASPERRY_PI):
             if (self.prev_theta0 is None or abs(self.prev_theta0 - theta0) > 0.1):
                 fangle0 = max(ONE_LOWER_LIMIT, min(ONE_UPPER_LIMIT, theta0))
-                print(f"     moving servo0 to {fangle0:0.1f}")
+                if DEBUG:
+                    print(f"     moving servo0 to {fangle0:0.1f}")
                 self.axis0.angle = fangle0
             else:
-                print("       Skipping 0 because its close to origin")
+                if DEBUG:
+                    print("       Skipping 0 because its close to current position")
 
             if (self.prev_theta1 is None or abs(self.prev_theta1 - theta1) > 0.1):
                 fangle1 = max(TWO_LOWER_LIMIT, min(TWO_UPPER_LIMIT, theta1))
                 print(f"     moving servo1 to {fangle1:0.1f}")
                 self.axis1.angle = fangle1
             else:
-                print("       Skipping 1 because its close to origin")
+                if DEBUG:
+                    print("       Skipping 1 because its close to current position")
         else:
-            angle = theta0
-            angle = theta1
+            print(f"theta0 {theta0:.2f} theta1 {theta1:.2f}")
 
         self.prev_theta0 = theta0
         self.prev_theta1 = theta1
@@ -141,7 +147,7 @@ class Driver():
         points = self.letter_to_points(letter)
         for p in points:
             rel_point = (p[0] + reference_point[0], p[1] + reference_point[1])
-            self.goto_point(p)
+            self.goto_point(rel_point)
             time.sleep(0.1)
         self.axis2.angle = TURTLE_UP
 
@@ -195,11 +201,14 @@ if __name__ == "__main__":
         d.get_zero_position()
         # d.produce_discrete_table()
         test_points = []
-        test_points.append((0.2140, 0.035)) # starting point for 0thetas
-        test_points.append((0.22, 0.035)) # left a little
-        test_points.append((0.20, 0.035)) # right a little 
-        test_points.append((0.2140, 0.07)) # down a little
-        test_points.append((0.2140, 0.1)) # up a little
+        test_points.append((d.X_OFFSET, d.Y_OFFSET)) # starting point for 0thetas
+        test_points.append((d.X_OFFSET - 0.005, d.Y_OFFSET)) # left a little
+        test_points.append((d.X_OFFSET + 0.005, d.Y_OFFSET)) # right a little 
+        
+        
+        test_points.append((d.X_OFFSET, d.Y_OFFSET)) # down a little
+        test_points.append((d.X_OFFSET, d.Y_OFFSET + 0.0025)) # up a little
+        test_points.append((d.X_OFFSET, d.Y_OFFSET - 0.0025)) # up a little
         for p in test_points:
             d.goto_point(p)
         # d.goto_point((float(sys.argv[1]), float(sys.argv[2])))
