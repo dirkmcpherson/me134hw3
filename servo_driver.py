@@ -157,13 +157,13 @@ class Driver():
 
     def run(self, word):
         print("Writing ", word)
-        if (len(word) > len(self.base_points)):
-            print("ERROR: Can not print more than %d letters." % len(word))
-            return
+        # if (len(word) > len(self.base_points)):
+        #     print("ERROR: Can not print more than %d letters." % len(word))
+        #     return
 
         for idx, l in enumerate(word):
             print("   writing ", l)
-            base_point = self.base_points[idx]
+            base_point = self.base_points[0]
             print("   going to base point %d: (%.1f, %.1f)" % (idx, base_point[0], base_point[1]))
             self.goto_point(base_point)
             self.draw_letter(l, base_point)
