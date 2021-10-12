@@ -107,7 +107,7 @@ class Driver():
 
         theta0 = self.cap_and_convert_theta(np.array(theta0, dtype=float))
         theta1 = self.cap_and_convert_theta(np.array(theta1, dtype=float))
-        theta1 += 67.
+        # theta1 += 67. # hardcoded addition to its zero 
 
         return theta0, theta1
 
@@ -127,7 +127,7 @@ class Driver():
                 self.prev_theta0 = fangle0
             else:
                 if DEBUG:
-                    print("       Skipping 0 because its close to current position")
+                    print(f"       Skipping 0 {theta0:.2f} because its close to current position")
 
             if (self.prev_theta1 is None or abs(self.prev_theta1 - theta1) > 0.1):
                 fangle1 = max(TWO_LOWER_LIMIT, min(TWO_UPPER_LIMIT, theta1))
@@ -137,7 +137,7 @@ class Driver():
                 self.prev_theta1 = fangle1
             else:
                 if DEBUG:
-                    print("       Skipping 1 because its close to current position")
+                    print(f"       Skipping 1 {theta1:.2f} because its close to current position")
         else:
             print(f"theta0 {theta0:.2f} theta1 {theta1:.2f}")
 
