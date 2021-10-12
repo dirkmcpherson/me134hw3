@@ -106,9 +106,9 @@ class Driver():
         #     new_pts.append(pts[-1])
         #     pts = new_pts
 
-        print(pts)
-        plt.scatter([entry[0] for entry in pts if not self.is_meta_point(entry)], [entry[1] for entry in pts if not self.is_meta_point(entry)])
-        plt.show()
+        # print(pts)
+        # plt.scatter([entry[0] for entry in pts if not self.is_meta_point(entry)], [entry[1] for entry in pts if not self.is_meta_point(entry)])
+        # plt.show()
 
         # if letter == 't':
         #     pts.insert(1, PUT_DOWN)
@@ -273,7 +273,7 @@ if __name__ == "__main__":
         d.run(word)
     else:
         import matplotlib.pyplot as plt
-        word = "t" #ct"
+        word = "ct" #ct"
         fangles = d.run(word)
         plt.scatter([entry[0] for entry in fangles], [entry[1] for entry in fangles])
         plt.show()
