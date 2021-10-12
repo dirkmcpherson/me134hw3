@@ -22,7 +22,7 @@ ONE_LOWER_LIMIT = 80
 ONE_UPPER_LIMIT = 140
 ONE_INC = 30
 
-SLEEP_INC = 0.05
+SLEEP_INC = 0.1
 
 ONE_ZERO_POINT = ONE_LOWER_LIMIT + (ONE_UPPER_LIMIT - ONE_LOWER_LIMIT) / 2.
 TWO_ZERO_POINT = TWO_LOWER_LIMIT + (TWO_UPPER_LIMIT - TWO_LOWER_LIMIT) / 2.
@@ -38,9 +38,9 @@ class FastBoy():
         # self.Y_OFFSET = 0.0350
 
     def up(self):
-        self.axis0.angle = TURTLE_UP
+        self.axis2.angle = TURTLE_UP
     def down(self):
-        self.axis0.angle = TURTLE_DOWN
+        self.axis2.angle = TURTLE_DOWN
 
     def goto(self, th0,th1):
         self.axis0.angle = max(ONE_LOWER_LIMIT, min(ONE_UPPER_LIMIT, th0))
