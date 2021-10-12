@@ -140,7 +140,7 @@ class Solver():
 
         print(solution)
         # embed()
-        return solution[2], solution[1]
+        return solution[0], solution[1]
 
     def fk(self, theta0, theta2):
         T_0_3 = generate_subs_transform_matrix_3_0(theta0, theta2)
