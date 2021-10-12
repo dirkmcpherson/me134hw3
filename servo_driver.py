@@ -3,7 +3,7 @@
 # James Staley
 
 ON_RASPERRY_PI = True # Debug off the raspberry pi
-DEBUG = False
+DEBUG = True
 HACK_THETA2 = False
 
 import time
@@ -215,7 +215,7 @@ class Driver():
                 if (ON_RASPERRY_PI): self.axis2.angle = TURTLE_UP
                 continue
 
-            scale_factor = 0.0075
+            scale_factor = 0.02
             rel_point = (scale_factor*p[0] + reference_point[0], scale_factor*p[1] + reference_point[1])
             fangles.append(self.goto_point(rel_point))
 
@@ -269,7 +269,7 @@ if __name__ == "__main__":
     if ON_RASPERRY_PI:
         # d.goto_point((0,0))
         # word = "|-" 
-        word = "-"
+        word = "ct"
         d.run(word)
     else:
         import matplotlib.pyplot as plt
