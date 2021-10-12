@@ -57,7 +57,6 @@ class Driver():
             print("WARNING: Running in Debug Configuration. WILL NOT WORK ON RASPBERRY PI.")
 
 
-
         # Let's try to write in the y range of [-0.1, 0.1] and the x range of 0.1, 0.15] so we get a straight box
         self.base_points = [
             (self.X_OFFSET, self.Y_OFFSET)
@@ -236,7 +235,7 @@ if __name__ == "__main__":
         d.get_zero_position()
         # d.produce_discrete_table()
         test_points = []
-        for i in range(3):
+        for i in range(5):
             test_points.append((d.X_OFFSET + 0.005*i, d.Y_OFFSET)) # left a little
         
         
