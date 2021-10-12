@@ -123,6 +123,7 @@ class Driver():
                 if DEBUG:
                     print(f"     moving servo0 to {fangle0:0.1f}")
                 self.axis0.angle = fangle0
+                self.prev_theta0 = fangle0
             else:
                 if DEBUG:
                     print("       Skipping 0 because its close to current position")
@@ -132,14 +133,13 @@ class Driver():
                 if DEBUG:
                     print(f"     moving servo1 to {fangle1:0.1f}")
                 self.axis1.angle = fangle1
+                self.prev_theta1 = fangle1
             else:
                 if DEBUG:
                     print("       Skipping 1 because its close to current position")
         else:
             print(f"theta0 {theta0:.2f} theta1 {theta1:.2f}")
 
-        self.prev_theta0 = theta0
-        self.prev_theta1 = theta1
 
         
     def draw_letter(self, letter, reference_point):
@@ -197,7 +197,7 @@ if __name__ == "__main__":
         
 
     if ON_RASPERRY_PI:
-        d.goto_point((0,0))
+        # d.goto_point((0,0))
         # word = "|-" 
         word = "|-|"
         d.run(word)
